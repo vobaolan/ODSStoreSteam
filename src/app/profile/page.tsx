@@ -41,7 +41,7 @@ function ProfileContent() {
   const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
   
   // Dashboard states
-  const [dashboardTab, setDashboardTab] = useState<'orders' | 'vault' | 'wishlist' | 'settings'>('orders');
+  const [dashboardTab, setDashboardTab] = useState<'orders' | 'vault' | 'wishlist' | 'settings' | 'transactions'>('orders');
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
 
   // Form states
@@ -68,10 +68,14 @@ function ProfileContent() {
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [activeChatOrderIds, setActiveChatOrderIds] = useState<Set<string>>(new Set());
 
+  // Transaction list
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
+
   // Check query params for active tab on mount
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam === 'vault' || tabParam === 'wishlist' || tabParam === 'settings' || tabParam === 'orders') {
+    if (tabParam === 'vault' || tabParam === 'wishlist' || tabParam === 'settings' || tabParam === 'orders' || tabParam === 'transactions') {
       setDashboardTab(tabParam as any);
     }
   }, [searchParams]);
@@ -118,6 +122,29 @@ function ProfileContent() {
       }
     };
     fetchOrders();
+  }, [currentUser]);
+
+  // Fetch transaction history
+  useEffect(() => {
+    if (!currentUser?.id) {
+      setTransactions([]);
+      return;
+    }
+    const fetchTransactions = async () => {
+      setIsLoadingTransactions(true);
+      try {
+        const res = await fetch(`/api/wallet/transactions?userId=${currentUser.id}`);
+        const data = await res.json();
+        if (res.ok) {
+          setTransactions(data.transactions || []);
+        }
+      } catch (err) {
+        console.error('Error fetching transactions:', err);
+      } finally {
+        setIsLoadingTransactions(false);
+      }
+    };
+    fetchTransactions();
   }, [currentUser]);
 
   useEffect(() => {
@@ -471,6 +498,19 @@ function ProfileContent() {
                     <span>Lịch Sử Đơn Hàng</span>
                   </button>
 
+                  {/* TAB 1.5: LỊCH SỬ NẠP TIỀN */}
+                  <button
+                    onClick={() => setDashboardTab('transactions')}
+                    className={`flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      dashboardTab === 'transactions'
+                        ? 'bg-ods-primary text-white'
+                        : 'text-ods-textMuted hover:text-black hover:bg-gray-100'
+                    }`}
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    <span>Lịch Sử Nạp Tiền</span>
+                  </button>
+
                   {/* TAB 2: KHO GAME ĐÃ MUA */}
                   <button
                     onClick={() => setDashboardTab('vault')}
@@ -523,6 +563,67 @@ function ProfileContent() {
 
               {/* RIGHT COLUMN: DETAIL WORKSPACE (8 cols) */}
               <div className="lg:col-span-8 space-y-6">
+                
+                {/* TRANSACTIONS TAB */}
+                {dashboardTab === 'transactions' && (
+                  <div className="rounded-ods border border-ods-border bg-white p-6 space-y-4">
+                    <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-black border-b border-ods-border pb-3">
+                      Lịch Sử Nạp & Biến Động Số Dư
+                    </h3>
+
+                    {isLoadingTransactions ? (
+                      <div className="text-center py-12 text-xs text-ods-textMuted">
+                        Đang tải lịch sử giao dịch...
+                      </div>
+                    ) : transactions.length === 0 ? (
+                      <div className="text-center py-12 px-4 flex flex-col items-center justify-center space-y-4">
+                        <div className="h-14 w-14 rounded-full bg-blue-50 flex items-center justify-center text-ods-primary">
+                          <CreditCard className="h-6 w-6" />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-xs font-bold text-black uppercase tracking-wider">Chưa có lịch sử nạp tiền</h4>
+                          <p className="text-xs text-ods-textMuted font-light max-w-xs leading-relaxed mx-auto">
+                            Bạn chưa có bất kỳ giao dịch nạp tiền nào.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {transactions.map((tx) => (
+                          <div key={tx.id} className="rounded-ods border border-ods-border bg-ods-surface p-4 space-y-3.5">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                              <div>
+                                <span className="text-[10px] text-ods-textMuted font-mono block mb-1">
+                                  {new Date(tx.createdAt).toLocaleDateString('vi-VN', {
+                                    year: 'numeric', month: '2-digit', day: '2-digit',
+                                    hour: '2-digit', minute: '2-digit',
+                                  })}
+                                </span>
+                                <h4 className="font-heading text-xs font-bold text-black">
+                                  {tx.description || 'Nạp tiền vào ví'}
+                                </h4>
+                                {tx.referenceId && (
+                                  <span className="text-[10px] text-ods-textMuted font-mono mt-1 block">
+                                    Mã tham chiếu: {tx.referenceId}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-left sm:text-right shrink-0">
+                                <span className={`text-xs font-extrabold block ${tx.type === 'DEPOSIT' ? 'text-emerald-600' : 'text-red-500'}`}>
+                                  {tx.type === 'DEPOSIT' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                </span>
+                                <span className="inline-flex items-center gap-1 text-[9.5px] text-emerald-600 font-bold uppercase mt-1">
+                                  <CheckCircle2 className="h-3 w-3" /> Thành công
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* 1. ORDERS TAB */}
                 {dashboardTab === 'orders' && (
                   <div className="rounded-ods border border-ods-border bg-white p-6 space-y-4">
