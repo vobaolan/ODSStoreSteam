@@ -40,28 +40,21 @@ export async function POST(request: Request) {
       );
     }
 
-      // Find user in database
-      let user = null;
-      try {
-        user = await prisma.user.findUnique({
-          where: { email: cleanEmail },
-        });
-      } catch (dbErr: any) {
-        console.warn('Prisma DB connection issue during login, falling back to Supabase REST:', dbErr.message);
-        const { supabase } = await import('@/lib/supabase');
-        const { data: supabaseUsers, error: supaErr } = await supabase
-          .from('User')
-          .select('*')
-          .eq('email', cleanEmail);
-          
-        if (supaErr || !supabaseUsers || supabaseUsers.length === 0) {
-           return NextResponse.json(
-            { message: 'Tài khoản hoặc mật khẩu không chính xác!' },
-            { status: 404 }
-          );
-        }
-        user = supabaseUsers[0];
+      // [OPTIMIZATION] Bypass Prisma on Netlify due to IPv6/IPv4 connection timeout issues.
+      // We use Supabase REST SDK as the PRIMARY fetch method for blazing fast performance.
+      const { supabase } = await import('@/lib/supabase');
+      const { data: supabaseUsers, error: supaErr } = await supabase
+        .from('User')
+        .select('*')
+        .eq('email', cleanEmail);
+        
+      if (supaErr || !supabaseUsers || supabaseUsers.length === 0) {
+         return NextResponse.json(
+          { message: 'Tài khoản hoặc mật khẩu không chính xác!' },
+          { status: 404 }
+        );
       }
+      const user = supabaseUsers[0];
 
       if (user) {
         if (!user.password) {

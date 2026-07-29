@@ -38,59 +38,17 @@ export async function GET() {
       return p.deliveryMethod || 'GIFT';
     };
 
-    let dbProducts = null;
-    try {
-      dbProducts = await prisma.product.findMany({
-        orderBy: { createdAt: 'desc' },
-      });
-    } catch (prismaErr) {
-      console.warn('Prisma failed, falling back to Supabase REST for products', prismaErr);
-    }
-
-    if (dbProducts && dbProducts.length > 0) {
-      const formattedProducts = dbProducts.map((p) => {
-        const price = typeof p.price === 'string' ? parseFloat(p.price) : Number(p.price);
-        const discountPrice = p.discountPrice
-          ? (typeof p.discountPrice === 'string' ? parseFloat(p.discountPrice) : Number(p.discountPrice))
-          : null;
-
-        let trailerUrls: string[] = [];
-        if (p.trailerUrl) {
-          trailerUrls = p.trailerUrl.split(' | ').map((u) => u.trim());
-        }
-
-        return {
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
-          description: p.description,
-          price,
-          discountPrice,
-          coverImage: p.coverImage,
-          category: p.category,
-          platform: p.platform,
-          type: p.type,
-          deliveryMethod: resolveDeliveryMethod(p),
-          mediaOrder: p.mediaOrder || 'image_first',
-          status: p.status,
-          isFlashDeal: p.isFlashDeal || false,
-          flashSaleEnd: p.flashSaleEnd ? new Date(p.flashSaleEnd).toISOString() : null,
-          isFeaturedDeal: p.isFeaturedDeal || false,
-          tags: p.tags,
-          trailerUrl: p.trailerUrl,
-          trailerUrls,
-          screenshots: p.screenshots || [],
-        };
-      });
-
-      return NextResponse.json({ products: formattedProducts }, { status: 200, headers });
-    }
-
-    // 2. Secondary: Query directly from Supabase Database via REST SDK (Fallback)
-    const { data: supabaseProducts } = await supabase
+    // [OPTIMIZATION] Bypass Prisma on Netlify due to IPv6/IPv4 connection timeout issues.
+    // We use Supabase REST SDK as the PRIMARY fetch method for blazing fast performance.
+    const { data: supabaseProducts, error: supaErr } = await supabase
       .from('Product')
       .select('*')
       .order('createdAt', { ascending: false });
+
+    if (supaErr) {
+      console.error('Supabase REST error:', supaErr);
+      throw new Error('Supabase fetch failed');
+    }
 
     const formattedSupabaseProducts = (supabaseProducts || []).map((p: any) => {
       const price = typeof p.price === 'string' ? parseFloat(p.price) : Number(p.price);
@@ -128,6 +86,7 @@ export async function GET() {
     });
 
     return NextResponse.json({ products: formattedSupabaseProducts }, { status: 200, headers });
+
   } catch (error: any) {
     console.error('Lỗi khi tải danh sách sản phẩm:', error);
     return NextResponse.json(
