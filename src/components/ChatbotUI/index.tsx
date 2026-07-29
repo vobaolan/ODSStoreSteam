@@ -83,7 +83,11 @@ export default function ChatbotWidget() {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50 flex items-end gap-3">
+      <motion.div 
+        drag 
+        dragMomentum={false} 
+        className="fixed bottom-6 right-6 z-[9999] flex items-end gap-3"
+      >
         {/* Tooltip Notification */}
         <AnimatePresence>
           {showTooltip && !isOpen && (
@@ -219,7 +223,7 @@ export default function ChatbotWidget() {
             <CyberBotAvatar size="lg" isThinking={isLoading && isOpen} state={isOpen ? 'active' : 'idle'} />
           </div>
         </motion.button>
-      </div>
+      </motion.div>
     </>
   );
 }
