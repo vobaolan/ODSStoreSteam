@@ -318,11 +318,11 @@ export const FeaturedDealCard: React.FC<FeaturedDealCardProps> = ({
                       <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-sky-400 fill-sky-400/20" />
                     </div>
                     <div className="flex flex-col justify-center">
-                      <div className="text-[10.5px] sm:text-[11px] font-black text-white tracking-wide leading-none whitespace-nowrap uppercase">
-                        Tốc Độ Giao
+                      <div className="text-[13px] sm:text-[14px] font-black text-white font-mono tracking-tight leading-none whitespace-nowrap">
+                        {activeProduct.deliveryMethod === 'GIFT' ? '< 5 Phút' : '< 5 Giây'}
                       </div>
-                      <span className="text-[10.5px] sm:text-[11px] font-bold text-sky-200/80 mt-0.5 block whitespace-nowrap">
-                        {steamStats.deliverySpeed}
+                      <span className="text-[9.5px] sm:text-[10px] font-bold text-sky-200/80 uppercase mt-0.5 block whitespace-nowrap">
+                        Tốc Độ Giao
                       </span>
                     </div>
                   </div>
