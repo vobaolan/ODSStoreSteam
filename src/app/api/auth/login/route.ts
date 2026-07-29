@@ -83,30 +83,22 @@ export async function POST(request: Request) {
             { status: 401 }
           );
         }
+      } else {
+        return NextResponse.json(
+          { message: 'Tài khoản không tồn tại!' },
+          { status: 404 }
+        );
       }
     } catch (dbErr: any) {
       console.warn('Prisma DB connection issue during login:', dbErr.message);
+      return NextResponse.json(
+        { message: 'Lỗi kết nối cơ sở dữ liệu. Vui lòng thử lại sau.' },
+        { status: 500 }
+      );
     }
-
-    // Fallback authentication if DB is temporarily unreachable
-    const isDbAdmin = cleanEmail.includes('admin');
-    return NextResponse.json(
-      {
-        message: 'Đăng nhập thành công!',
-        user: {
-          id: `user-${Date.now()}`,
-          name: cleanEmail.split('@')[0],
-          email: cleanEmail,
-          balance: 0,
-          role: isDbAdmin ? 'ADMIN' : 'USER',
-        },
-      },
-      { status: 200 }
-    );
   } catch (error: any) {
-    console.error('Lỗi khi đăng nhập tài khoản:', error);
     return NextResponse.json(
-      { message: 'Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại!' },
+      { message: 'Lỗi server: ' + error.message },
       { status: 500 }
     );
   }
