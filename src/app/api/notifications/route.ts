@@ -57,8 +57,17 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    // Xóa tất cả thông báo
-    await prisma.notification.deleteMany();
+    const url = new URL(request.url);
+    const id = url.searchParams.get('id');
+
+    if (id) {
+      await prisma.notification.delete({
+        where: { id },
+      });
+    } else {
+      // Xóa tất cả thông báo
+      await prisma.notification.deleteMany();
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete notifications' }, { status: 500 });

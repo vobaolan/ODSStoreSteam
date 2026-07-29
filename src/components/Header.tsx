@@ -382,9 +382,22 @@ export const Header: React.FC = () => {
                                 <p className="text-[11px] text-zinc-700 line-clamp-1">{notif.productNames}</p>
                                 <p className="text-[10px] text-zinc-400 mt-1">{new Date(notif.timestamp).toLocaleString('vi-VN')}</p>
                               </div>
-                              {!notif.read && (
-                                <div className="h-2 w-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                              )}
+                              <div className="flex flex-col items-end gap-2">
+                                {!notif.read && <div className="h-2 w-2 bg-red-500 rounded-full flex-shrink-0"></div>}
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    await fetch(`/api/notifications?id=${notif.id}`, { method: 'DELETE' });
+                                    setAdminNotifications(adminNotifications.filter((n: any) => n.id !== notif.id));
+                                  }}
+                                  className="text-zinc-400 hover:text-red-500 p-1 rounded-full hover:bg-red-50 transition-colors"
+                                  title="Xóa thông báo này"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
                             </button>
                           ))
                         )}
