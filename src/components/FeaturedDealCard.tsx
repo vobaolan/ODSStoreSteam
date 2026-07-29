@@ -278,51 +278,42 @@ export const FeaturedDealCard: React.FC<FeaturedDealCardProps> = ({
                   </h2>
                 </Link>
 
-                {/* STEAMDB AUTOMATIC LIVE STATS MATRIX (Chuẩn 100% Giao diện SteamDB) */}
-                <div className="pt-4 pb-2 flex flex-nowrap gap-1.5 sm:gap-2 w-full max-w-2xl overflow-x-visible">
-                  {/* Card 1: SteamDB Rating */}
-                  <div className="group/stat flex items-center gap-1.5 sm:gap-2 p-1.5 px-2 sm:px-2.5 rounded-xl bg-slate-900/60 border border-white/10 backdrop-blur-xl shadow-lg hover:border-sky-500/50 hover:bg-slate-900/80 transition-all cursor-default flex-shrink-0">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-sky-500/20 to-blue-600/20 border border-sky-500/30 flex items-center justify-center shrink-0 group-hover/stat:shadow-[0_0_15px_rgba(14,165,233,0.4)] transition-all">
-                      <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-sky-400 fill-sky-400" />
+                {/* PREMIUM STEAMDB STATS MATRIX (Redesigned for 2 items) */}
+                <div className="pt-5 pb-3 flex flex-wrap sm:flex-nowrap gap-3 sm:gap-4 w-full max-w-2xl">
+                  {/* Premium Card 1: Steam Reviews */}
+                  <div className="group/stat relative flex items-center gap-3 p-2 pr-6 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-900/40 border border-white/5 hover:border-sky-500/40 backdrop-blur-xl shadow-[0_8px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_0_25px_rgba(14,165,233,0.25)] transition-all duration-500 cursor-default overflow-hidden flex-1 sm:flex-none">
+                    {/* Inner glowing highlight */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-sky-500/0 via-sky-500/5 to-sky-500/0 translate-x-[-100%] group-hover/stat:translate-x-[100%] transition-transform duration-1000"></div>
+                    
+                    <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400/20 via-blue-600/20 to-indigo-500/20 border border-sky-400/30 flex items-center justify-center shrink-0 shadow-inner group-hover/stat:border-sky-300/50 transition-colors">
+                      <Star className="h-5 w-5 text-sky-400 fill-sky-400 drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
                     </div>
                     <div className="flex flex-col justify-center">
-                      <div className="text-[13px] sm:text-[14px] font-black text-white font-mono tracking-tight leading-none whitespace-nowrap">
+                      <div className="text-[16px] font-black text-white font-mono tracking-tight leading-none drop-shadow-md">
                         {steamStats.ratingPercent}
                       </div>
-                      <span className="text-[9.5px] sm:text-[10px] font-bold text-sky-200/80 uppercase mt-0.5 block whitespace-nowrap">
+                      <span className="text-[10px] font-extrabold text-sky-300/80 uppercase mt-1 block tracking-wider">
                         {steamStats.reviewsCount}
                       </span>
                     </div>
                   </div>
 
-                  {/* Card 2: Live Players */}
-                  <div className="group/stat flex items-center gap-1.5 sm:gap-2 p-1.5 px-2 sm:px-2.5 rounded-xl bg-slate-900/60 border border-white/10 backdrop-blur-xl shadow-lg hover:border-sky-500/50 hover:bg-slate-900/80 transition-all cursor-default flex-shrink-0">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-sky-500/20 to-blue-600/20 border border-sky-500/30 flex items-center justify-center shrink-0 relative group-hover/stat:shadow-[0_0_15px_rgba(14,165,233,0.4)] transition-all">
-                      <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-sky-400" />
-                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-sky-400 animate-ping opacity-75" />
-                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-sky-500 border border-slate-900" />
+                  {/* Premium Card 2: Live Players */}
+                  <div className="group/stat relative flex items-center gap-3 p-2 pr-6 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-900/40 border border-white/5 hover:border-emerald-500/40 backdrop-blur-xl shadow-[0_8px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.2)] transition-all duration-500 cursor-default overflow-hidden flex-1 sm:flex-none">
+                    {/* Inner glowing highlight */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 translate-x-[-100%] group-hover/stat:translate-x-[100%] transition-transform duration-1000"></div>
+                    
+                    <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400/20 via-teal-600/20 to-cyan-500/20 border border-emerald-400/30 flex items-center justify-center shrink-0 shadow-inner group-hover/stat:border-emerald-300/50 transition-colors">
+                      <Users className="h-5 w-5 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping opacity-75" />
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-slate-900 shadow-sm" />
                     </div>
                     <div className="flex flex-col justify-center">
-                      <div className="text-[13px] sm:text-[14px] font-black text-white font-mono tracking-tight leading-none whitespace-nowrap">
+                      <div className="text-[16px] font-black text-white font-mono tracking-tight leading-none drop-shadow-md">
                         {steamStats.inGamePlayers}
                       </div>
-                      <span className="text-[9.5px] sm:text-[10px] font-bold text-sky-200/80 uppercase mt-0.5 block whitespace-nowrap">
+                      <span className="text-[10px] font-extrabold text-emerald-300/80 uppercase mt-1 block tracking-wider">
                         In-Game Live
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Card 3: Delivery Speed */}
-                  <div className="group/stat flex items-center gap-1.5 sm:gap-2 p-1.5 px-2 sm:px-2.5 rounded-xl bg-slate-900/60 border border-white/10 backdrop-blur-xl shadow-lg hover:border-sky-500/50 hover:bg-slate-900/80 transition-all cursor-default flex-shrink-0">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-sky-500/20 to-blue-600/20 border border-sky-500/30 flex items-center justify-center shrink-0 group-hover/stat:shadow-[0_0_15px_rgba(14,165,233,0.4)] transition-all">
-                      <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-sky-400 fill-sky-400/20" />
-                    </div>
-                    <div className="flex flex-col justify-center">
-                      <div className="text-[13px] sm:text-[14px] font-black text-white font-mono tracking-tight leading-none whitespace-nowrap">
-                        {activeProduct.deliveryMethod === 'GIFT' ? '< 5 Phút' : '< 5 Giây'}
-                      </div>
-                      <span className="text-[9.5px] sm:text-[10px] font-bold text-sky-200/80 uppercase mt-0.5 block whitespace-nowrap">
-                        Tốc Độ Giao
                       </span>
                     </div>
                   </div>
