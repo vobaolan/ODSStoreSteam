@@ -40,7 +40,6 @@ export async function POST(request: Request) {
       );
     }
 
-    try {
       // Find user in database
       let user = null;
       try {
