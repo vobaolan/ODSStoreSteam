@@ -1,0 +1,200 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Platform {
+  STEAM
+  EPIC
+  EA
+  UBISOFT
+  SERVICE
+}
+
+enum ProductType {
+  KEY_CODE     // Mã key kích hoạt game
+  STEAM_GIFT   // Dạng quà tặng Steam
+  ACCOUNT      // Tài khoản cấp sẵn (Game + Mật khẩu)
+  WALLET_CARD  // Thẻ nạp ví Steam Wallet
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum PaymentMethod {
+  VIETQR
+  PAYOS
+  MOMO
+  ZALOPAY
+  WALLET       // Thanh toán bằng số dư tài khoản
+}
+
+enum TransactionType {
+  DEPOSIT      // Nạp tiền vào ví
+  PURCHASE     // Dùng ví mua hàng
+  REFUND       // Hoàn tiền
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum KeyStatus {
+  AVAILABLE    // Key chưa bán
+  SOLD         // Key đã bán và bàn giao
+  ON_HOLD      // Key đang được giữ trong giỏ hàng thanh toán
+}
+
+model User {
+  id            String        @id @default(uuid())
+  name          String?
+  email         String        @unique
+  emailVerified DateTime?
+  password      String?       // Nullable nếu đăng nhập bằng OAuth (Google/Steam)
+  image         String?
+  role          Role          @default(USER)
+  balance       Decimal       @default(0.00) @db.Decimal(12, 2) // Ví tiền VND
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  orders        Order[]
+  transactions  Transaction[]
+  keysOwned     GameKey[]     @relation("KeyOwner")
+}
+
+model Product {
+  id            String      @id @default(uuid())
+  name          String
+  slug          String      @unique
+  description   String      @db.Text
+  price         Decimal     @db.Decimal(12, 2)
+  discountPrice Decimal?    @db.Decimal(12, 2) // Giá khuyến mãi nếu có
+  coverImage    String
+  screenshots   String[]    // Danh sách ảnh chi tiết / gallery
+  trailerUrl    String?     // Link Youtube Trailer
+  minimumReq    Json?       // Cấu hình tối thiểu
+  recommendedReq Json?      // Cấu hình đề nghị
+  category      String[]    // Thể loại (Action, RPG, Horror, v.v.)
+  platform      Platform    @default(STEAM)
+  type          ProductType @default(KEY_CODE)
+  deliveryMethod String?    @default("AUTO_KEY") // AUTO_KEY, GIFT_ACC, NEW_ACC, UPGRADE_ACC
+  mediaOrder    String?     @default("image_first") // image_first vs video_first
+  status        Boolean     @default(true) // Kích hoạt bán hay ẩn
+  isFlashDeal   Boolean     @default(false) // Hiển thị trong Flash Deals Hôm Nay
+  flashSaleEnd  DateTime?   // Thời gian kết thúc Flash Sale
+  isFeaturedDeal Boolean    @default(false) // Hiển thị trong Deal Nổi Bật Trong Tuần
+  tags          String[]    // Bán chạy, Đang Sale, Pre-order, Sắp ra mắt
+  variants      Json?       // Gói thời hạn (1 Tháng, 3 Tháng...)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  keys          GameKey[]   // Liên kết kho key
+}
+
+model GameKey {
+  id          String    @id @default(uuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantName String?   // Phân loại gói (VD: 1 Tháng, 5 Ngày...)
+  keyCode     String    @db.Text // Key code, tk/mk dạng mã hóa hoặc text
+  status      KeyStatus @default(AVAILABLE)
+  orderId     String?
+  order       Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  userId      String?
+  user        User?     @relation("KeyOwner", fields: [userId], references: [id], onDelete: SetNull)
+  soldAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([productId, status])
+}
+
+model Order {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalAmount   Decimal       @db.Decimal(12, 2)
+  discountAmount Decimal      @default(0.00) @db.Decimal(12, 2)
+  netAmount     Decimal       @db.Decimal(12, 2) // Số tiền thực tế cần thanh toán
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentDetails Json?        // Mã giao dịch cổng thanh toán, log webhook
+  couponCode    String?
+  coupon        Coupon?       @relation(fields: [couponCode], references: [code])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  gameKeys      GameKey[]     // Các key xuất ra cho đơn hàng này
+}
+
+model Transaction {
+  id             String            @id @default(uuid())
+  userId         String
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount         Decimal           @db.Decimal(12, 2)
+  type           TransactionType
+  status         TransactionStatus @default(PENDING)
+  paymentGateway PaymentMethod
+  referenceId    String?           @unique // Mã tham chiếu (mã nạp tiền, mã giao dịch NH)
+  description    String?
+  createdAt      DateTime          @default(now())
+}
+
+model Coupon {
+  code          String    @id @unique
+  discountType  String    // PERCENT hoặc FIXED
+  discountValue Decimal   @db.Decimal(10, 2)
+  minOrderValue Decimal?  @db.Decimal(12, 2)
+  maxDiscount   Decimal?  @db.Decimal(12, 2)
+  expiresAt     DateTime
+  maxUses       Int
+  usedCount     Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  orders        Order[]
+}
+
+model Notification {
+  id           String    @id @default(uuid())
+  orderId      String?
+  customerId   String?
+  customerName String?
+  isGift       Boolean   @default(false)
+  productNames String?
+  read         Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+}
+
+model ChatMessage {
+  id         String    @id @default(uuid())
+  orderId    String
+  senderId   String    // ID của người gửi (Admin hoặc Customer)
+  receiverId String    // ID của người nhận
+  content    String    @db.Text
+  isRead     Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+
+  @@index([orderId])
+  @@index([receiverId, isRead])
+}

@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #000000;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar for ODS NZXT Light theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFFFFF;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0099FF;
+}
+
+.font-heading {
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+}
+
+.ods-glow-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ods-glow-hover:hover {
+  box-shadow: 0 8px 30px rgba(0, 153, 255, 0.15);
+  border-color: #0099FF;
+}
+
+.ods-volt-glow-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ods-volt-glow-hover:hover {
+  box-shadow: 0 8px 30px rgba(219, 232, 0, 0.2);
+  border-color: rgba(219, 232, 0, 0.6);
+}
