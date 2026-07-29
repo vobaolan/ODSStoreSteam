@@ -387,7 +387,7 @@ export const FeaturedDealCard: React.FC<FeaturedDealCardProps> = ({
         </AnimatePresence>
 
         {/* BOTTOM SECTION: STEAM OFFER COUNTDOWN TIMER & CTA PRICING BLOCK */}
-        <footer className="pt-5 border-t border-white/10 mt-auto space-y-4">
+        <footer className="pt-5 mt-auto space-y-4">
           {/* REAL-TIME OFFER COUNTDOWN TIMER & TIME PROGRESS BAR */}
           <div className="space-y-2 max-w-md">
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold">
