@@ -1538,7 +1538,7 @@ export default function AdminProductsPage() {
                     </label>
 
                     {/* Date-Time Picker for Deal Expiration Date */}
-                    {(formIsFeaturedDeal || formIsFlashDeal) && (
+                    {(formIsFeaturedDeal) && (
                       <div className="rounded-ods border border-amber-300 bg-amber-50/60 p-4 space-y-2 col-span-full">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <label className="text-[11px] font-extrabold text-amber-950 uppercase tracking-wider flex items-center gap-1.5">

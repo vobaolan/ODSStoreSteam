@@ -24,6 +24,7 @@ export class ProductSearchTool implements BaseTool {
         where: {
           name: {
             contains: query,
+            mode: 'insensitive'
           }
         },
         take: 5,
@@ -37,7 +38,10 @@ export class ProductSearchTool implements BaseTool {
           const fallbackProducts = await prisma.product.findMany({
             where: {
               OR: words.map((w: string) => ({
-                name: { contains: w }
+                name: { 
+                  contains: w,
+                  mode: 'insensitive'
+                }
               }))
             },
             take: 5,

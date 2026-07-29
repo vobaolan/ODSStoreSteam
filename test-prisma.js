@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { try { const p = await prisma.product.findMany({ take: 1 }); console.log('OK', p.length); } catch(e) { console.log('ERROR', e.message); } finally { await prisma.$disconnect(); } } main();
