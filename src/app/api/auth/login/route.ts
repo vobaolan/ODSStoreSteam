@@ -56,7 +56,7 @@ export async function POST(request: Request) {
           
         if (supaErr || !supabaseUsers || supabaseUsers.length === 0) {
            return NextResponse.json(
-            { message: 'Tài khoản không tồn tại hoặc lỗi kết nối: ' + (supaErr?.message || dbErr.message) },
+            { message: 'Tài khoản hoặc mật khẩu không chính xác!' },
             { status: 404 }
           );
         }
