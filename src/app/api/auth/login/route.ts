@@ -42,9 +42,27 @@ export async function POST(request: Request) {
 
     try {
       // Find user in database
-      const user = await prisma.user.findUnique({
-        where: { email: cleanEmail },
-      });
+      let user = null;
+      try {
+        user = await prisma.user.findUnique({
+          where: { email: cleanEmail },
+        });
+      } catch (dbErr: any) {
+        console.warn('Prisma DB connection issue during login, falling back to Supabase REST:', dbErr.message);
+        const { supabase } = await import('@/lib/supabase');
+        const { data: supabaseUsers, error: supaErr } = await supabase
+          .from('User')
+          .select('*')
+          .eq('email', cleanEmail);
+          
+        if (supaErr || !supabaseUsers || supabaseUsers.length === 0) {
+           return NextResponse.json(
+            { message: 'Tài khoản không tồn tại hoặc lỗi kết nối: ' + (supaErr?.message || dbErr.message) },
+            { status: 404 }
+          );
+        }
+        user = supabaseUsers[0];
+      }
 
       if (user) {
         if (!user.password) {
@@ -89,14 +107,7 @@ export async function POST(request: Request) {
           { status: 404 }
         );
       }
-    } catch (dbErr: any) {
-      console.warn('Prisma DB connection issue during login:', dbErr.message);
-      return NextResponse.json(
-        { message: 'Lỗi kết nối cơ sở dữ liệu. Vui lòng thử lại sau.' },
-        { status: 500 }
-      );
-    }
-  } catch (error: any) {
+    } catch (error: any) {
     return NextResponse.json(
       { message: 'Lỗi server: ' + error.message },
       { status: 500 }

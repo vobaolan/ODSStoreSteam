@@ -38,10 +38,14 @@ export async function GET() {
       return p.deliveryMethod || 'GIFT';
     };
 
-    // 1. Primary: Use Prisma to completely bypass Next.js fetch cache!
-    const dbProducts = await prisma.product.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    let dbProducts = null;
+    try {
+      dbProducts = await prisma.product.findMany({
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (prismaErr) {
+      console.warn('Prisma failed, falling back to Supabase REST for products', prismaErr);
+    }
 
     if (dbProducts && dbProducts.length > 0) {
       const formattedProducts = dbProducts.map((p) => {
